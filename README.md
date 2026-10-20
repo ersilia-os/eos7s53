@@ -2,8 +2,7 @@
 
 Predicts activity against Mycobacterium tuberculosis H37Rv, modelling drug-susceptible and drug-resistant isolates separately: probability of activity (ChEMBL MIC below 5 uM labelled active, above 15 uM inactive) plus pMIC for MIC, MIC90 and MIC99, each with Tanimoto similarity to its training set. Eight tree-based models use RDKit descriptors and Morgan fingerprints, trained on ChEMBL 37 data (25,645 susceptible and 3,749 resistant compounds); scaffold-held-out AUROC is 0.86 and 0.84. Validation is retrospective only.
 
-This model was incorporated on 2026-10-20.
-
+This model was incorporated on 2026-10-20.Last packaged on 2026-10-20.
 
 ## Information
 ### Identifiers
@@ -44,12 +43,19 @@ _10 of 16 columns are shown_
 ### Source and Deployment
 - **Source:** `Local`
 - **Source Type:** `External`
+- **DockerHub**: [https://hub.docker.com/r/ersiliaos/eos7s53](https://hub.docker.com/r/ersiliaos/eos7s53)
+- **Docker Architecture:** `AMD64`, `ARM64`
 - **S3 Storage**: [https://ersilia-models-zipped.s3.eu-central-1.amazonaws.com/eos7s53.zip](https://ersilia-models-zipped.s3.eu-central-1.amazonaws.com/eos7s53.zip)
 
 ### Resource Consumption
 - **Model Size (Mb):** `926`
 - **Environment Size (Mb):** `795`
+- **Image Size (Mb):** `2601.26`
 
+**Computational Performance (seconds):**
+- 10 inputs: `54.4`
+- 100 inputs: `44.97`
+- 10000 inputs: `1432.96`
 
 ### References
 - **Source Code**: [https://github.com/jasdeep002/MtbAIM](https://github.com/jasdeep002/MtbAIM)
