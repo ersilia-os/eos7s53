@@ -1,56 +1,85 @@
-# Ersilia Model Template
+# MtbAIM Antitubercular Activity
 
-This document contains the instructions to incorporate a model. Please follow along to bring your model into the [Ersilia Model Hub](https://github.com/ersilia-os/ersilia). After successful incorporation of the model, this README file will be **automatically updated** to reflect model specific details.
+Predicts activity against Mycobacterium tuberculosis H37Rv, modelling drug-susceptible and drug-resistant isolates separately: probability of activity (ChEMBL MIC below 5 uM labelled active, above 15 uM inactive) plus pMIC for MIC, MIC90 and MIC99, each with Tanimoto similarity to its training set. Eight tree-based models use RDKit descriptors and Morgan fingerprints, trained on ChEMBL 37 data (25,645 susceptible and 3,749 resistant compounds); scaffold-held-out AUROC is 0.86 and 0.84. Validation is retrospective only.
 
-Further information about model incorporation can be found in our [Documentation](https://ersilia.gitbook.io/ersilia-book/ersilia-model-hub/model-contribution/).
 
-## Template Structure
 
-The model template is organized in two parts, i.e. the (a) model code and parameters, and (b) the metadata and installation instructions
+## Information
+### Identifiers
+- **Ersilia Identifier:** `eos7s53`
+- **Slug:** `mtbaim`
 
-### The Model Folder
+### Domain
+- **Task:** `Annotation`
+- **Subtask:** `Activity prediction`
+- **Biomedical Area:** `Tuberculosis`, `Antimicrobial resistance`
+- **Target Organism:** `Mycobacterium tuberculosis`
+- **Tags:** `Antimicrobial activity`, `MIC90`, `ChEMBL`
 
-Generally, two important pieces make up a model that goes into the Ersilia Model Hub: (a) the model checkpoints and (b) the code to load those checkpoints and make predictions with that model (framework). With that in mind, the model folder is organised as follows:
+### Input
+- **Input:** `Compound`
+- **Input Dimension:** `1`
 
-- `model/checkpoints` contains checkpoint files required by the model. This directory is optional.
-- `model/framework` contains the driver code to load the model and run inferences from it. There are two files of interest here: `code/main.py`, and `run.sh`. The `code/main.py` file will contain the primary code to load model checkpoints and run the model, and can obviously refer to other files and packages contained within the `code` directory. The `run.sh` serves two purposes, it runs the code in the `main.py` file and also tells Ersilia that this model server will have a `run` API. The `run.sh` file is mandatory while the `code/main.py` is optional.
-- `model/framework/examples` contains an example input file (should have three smiles under the header smiles, this file can be generated with the `ersilia example` command) and the output of running the `run.sh` on the example inputs. Both `run_input.csv` and `run_output.csv` are mandatory.
-- `model/framework/columns` contains a template of the expected output columns, indicating their name, type (float, integer or string), direction (high, low, or empty) and a short one-sentence description. For more rules on how to fill in this file, check our [documentation](https://ersilia.gitbook.io/ersilia-book/ersilia-model-hub/model-contribution/model-template). The `run_columns.csv` file is mandatory.
+### Output
+- **Output Dimension:** `16`
+- **Output Consistency:** `Fixed`
+- **Interpretation:** Probabilities of activity and pMIC (-log10 molar MIC) for susceptible and resistant M. tuberculosis, each paired with training-set Tanimoto similarity.
 
-### Metadata, Installation, and Other Templated Files
+Below are the **Output Columns** of the model:
+| Name | Type | Direction | Description |
+|------|------|-----------|-------------|
+| ds_prob_active | float | high | Probability of activity against drug-susceptible M. tuberculosis H37Rv from an ExtraTrees classifier (active is MIC below 5 uM and inactive above 15 uM in training; the authors' calibrated decision threshold is 0.4375) |
+| dr_prob_active | float | high | Probability of activity against drug-resistant M. tuberculosis isolates from a histogram gradient boosting classifier (active is MIC below 5 uM and inactive above 15 uM in training; the authors' calibrated decision threshold is 0.6511) |
+| ds_pmic | float | high | Predicted pMIC (minus log10 of the MIC in mol/L; higher means more potent) against drug-susceptible M. tuberculosis from an ExtraTrees regressor trained on 21683 compounds (pooled out-of-fold RMSE 0.714) |
+| ds_pmic90 | float | high | Predicted pMIC (minus log10 of the MIC90 in mol/L; higher means more potent) against drug-susceptible M. tuberculosis from a LightGBM regressor trained on 3754 compounds (pooled out-of-fold RMSE 0.682) |
+| ds_pmic99 | float | high | Predicted pMIC (minus log10 of the MIC99 in mol/L; higher means more potent) against drug-susceptible M. tuberculosis from an XGBoost regressor trained on 1846 compounds (pooled out-of-fold RMSE 0.670) |
+| dr_pmic | float | high | Predicted pMIC (minus log10 of the MIC in mol/L; higher means more potent) against drug-resistant M. tuberculosis from an ExtraTrees regressor trained on 3220 compounds (pooled out-of-fold RMSE 0.729) |
+| dr_pmic90 | float | high | Predicted pMIC (minus log10 of the MIC90 in mol/L; higher means more potent) against drug-resistant M. tuberculosis from an ExtraTrees regressor trained on 561 compounds (pooled out-of-fold RMSE 0.784) |
+| dr_pmic99 | float | high | Predicted pMIC (minus log10 of the MIC99 in mol/L; higher means more potent) against drug-resistant M. tuberculosis from an ExtraTrees regressor trained on 180 compounds (pooled out-of-fold RMSE 0.604); few training compounds so treat with caution |
+| ds_clf_sim | float | high | Maximum Tanimoto similarity (Morgan radius 2 with 2048 bits and chirality) between the query and the 25645 compounds used to train the susceptible activity classifier; low values mean the query is far from the training chemistry |
+| dr_clf_sim | float | high | Maximum Tanimoto similarity (Morgan radius 2 with 2048 bits and chirality) between the query and the 3749 compounds used to train the resistant activity classifier; low values mean the query is far from the training chemistry |
 
-In addition to adding the model checkpoints, the code for running them and the example and columns file, you'll need to edit the following:
+_10 of 16 columns are shown_
+### Source and Deployment
+- **Source:** `Local`
+- **Source Type:** `External`
 
-#### Model Dependencies
+### Resource Consumption
 
-Use the `install.yml` file to specify all the necessary dependencies required by the model to successfully run. This dependency configuration file has two top level keys:
 
-- The `python` field expects a string value denoting a python version (e.g. `"3.12"`)
-- The `commands` field expects a list of values, each of which is a list on its own, denoting the dependencies required by the model. Currently, `pip` and `conda` dependencies are supported using this syntax. 
-    - `pip` dependencies are expected to be one of the following lists:
-        -  Versioned dependency: three element lists in the format `["pip", "library", "version"]`
-        - Versioned dependency with additional flags: five element lists in the format `["pip", "library", "version", "--index-url", "URL"]`
-        - VCS-based dependency: four element lists in the format `['pip', 'URL']`. E.g `["pip", "git+https://github.com/bp-kelley/descriptastorus.git@9a190343bcd3cfd35142d378d952613bcac40797"]`.
-    - `conda` dependencies are expected to be four element lists in the format `["conda", "library", "version", "channel"]`, where channel is the conda channel to install the required library.
-    - For other `bash` commands, simply specify them as a oneliner string.
+### References
+- **Source Code**: [https://github.com/jasdeep002/MtbAIM](https://github.com/jasdeep002/MtbAIM)
+- **Publication**: [https://doi.org/10.64898/2026.09.28.754881](https://doi.org/10.64898/2026.09.28.754881)
+- **Publication Type:** `Preprint`
+- **Publication Year:** `2026`
+- **Ersilia Contributor:** [arnaucoma24](https://github.com/arnaucoma24)
 
-The installation parser will raise an exception if dependencies are not specified in the aforementioned format.
+### License
+This package is licensed under a [GPL-3.0](https://github.com/ersilia-os/ersilia/blob/master/LICENSE) license. The model contained within this package is licensed under a [MIT](LICENSE) license.
 
-#### Model Metadata
+**Notice**: Ersilia grants access to models _as is_, directly from the original authors, please refer to the original code repository and/or publication if you use the model in your research.
 
-Model metadata should be specified within `metadata.yml`. A detailed explanation of what the metadata fields correspond to can be found [here](https://ersilia.gitbook.io/ersilia-book/ersilia-model-hub/incorporate-models/model-template). Note that some fields will be automatically updated upon model incorporation in Ersilia.
 
-#### Other Relevant Files
+## Use
+To use this model locally, you need to have the [Ersilia CLI](https://github.com/ersilia-os/ersilia) installed.
+The model can be **fetched** using the following command:
+```bash
+# fetch model from the Ersilia Model Hub
+ersilia fetch eos7s53
+```
+Then, you can **serve**, **run** and **close** the model as follows:
+```bash
+# serve the model
+ersilia serve eos7s53
+# generate an example file
+ersilia example -n 3 -f my_input.csv
+# run the model
+ersilia run -i my_input.csv -o my_output.csv
+# close the model
+ersilia close
+```
 
-- The `.dockerignore` file can be used to specify which files and folders should not be included in the eventual Docker image. By default, the `.git` folder is ignored. Other files to be ignored could include training data of the model, which will be available in GitHub and S3 but is not needed to run the model image. This is devised to reduce the final size of the images.
-
-- Consider adding a `.gitattributes` file if your model contains large files. In this file, you can specify which files should be handled with [Git LFS](https://git-lfs.com/).
-
-- As you work with the model, use the `.gitignore` file appropriately to ensure that only relevant files are included in the model repository.
-
-- As mentioned above, the `README.md` file **should not be modified**. It will automatically be updated when the model is incorporated in the Ersilia Model Hub.
-
-## Tracking and Workflows
-
-- The [EOSVC](https://github.com/ersilia-os/eosvc) tool is used to persist the `model/checkpoints` and `model/framework/fit` folders. Edit the `access.json` file if you want to keep those folders private. They are public by default.
-- Models are not ready until they pass all GitHub Actions workflows.
+## About Ersilia
+The [Ersilia Open Source Initiative](https://ersilia.io) is a tech non-profit organization fueling sustainable research in the Global South.
+Please [cite](https://github.com/ersilia-os/ersilia/blob/master/CITATION.cff) the Ersilia Model Hub if you've found this model to be useful. Always [let us know](https://github.com/ersilia-os/ersilia/issues) if you experience any issues while trying to run it.
+If you want to contribute to our mission, consider [donating](https://www.ersilia.io/donate) to Ersilia!
