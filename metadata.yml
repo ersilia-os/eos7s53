@@ -2,43 +2,39 @@ Identifier: eos7s53
 Slug: mtbaim
 Status: In progress
 Title: MtbAIM Antitubercular Activity
-Description: 'Predicts small-molecule activity against Mycobacterium tuberculosis
-  H37Rv, modelling drug-susceptible and drug-resistant isolates separately: an active/inactive
-  probability for each, plus pMIC estimates for MIC, MIC90 and MIC99 endpoints. Eight
-  tree-based models use RDKit descriptors and Morgan fingerprints trained on ChEMBL,
-  reaching scaffold-held-out AUROC of 0.86 (susceptible) and 0.84 (resistant). Validation
-  is retrospective only, and the resistant MIC99 set holds just 180 compounds.'
+Description: 'Predicts activity against Mycobacterium tuberculosis H37Rv, modelling
+  drug-susceptible and drug-resistant isolates separately: probability of activity
+  (ChEMBL MIC below 5 uM labelled active, above 15 uM inactive) plus pMIC for MIC,
+  MIC90 and MIC99, each with Tanimoto similarity to its training set. Eight tree-based
+  models use RDKit descriptors and Morgan fingerprints, trained on ChEMBL 37 data
+  (25,645 susceptible and 3,749 resistant compounds); scaffold-held-out AUROC is 0.86
+  and 0.84. Validation is retrospective only.'
 Deployment:
   - Local
-  - Online
-Source: Local, Online
-Source Type: Internal, Replicated, External
-Task: Annotation, Representation, Sampling
-Subtask: Property calculation or prediction, Activity prediction, Featurization,
-  Projection, Similarity search, Generation
+Source: Local
+Source Type: External
+Task: Annotation
+Subtask: Activity prediction
 Input:
   - Compound
 Input Dimension: 1
 Output:
-  - Value
   - Score
-  - Compound
-  - Text
-Output Dimension: 1
-Output Consistency: Fixed, Variable
-Interpretation: The output of this template model should be interpreted like 
-  this.
+  - Value
+Output Dimension: 16
+Output Consistency: Fixed
+Interpretation: Probabilities of activity and pMIC (-log10 molar MIC) for susceptible
+  and resistant M. tuberculosis, each paired with training-set Tanimoto similarity.
 Tag:
   - Antimicrobial activity
   - MIC90
   - ChEMBL
 Biomedical Area:
-  - Biomedical Area 1
-  - Biomedical Area 2
+  - Tuberculosis
+  - Antimicrobial resistance
 Target Organism:
-  - Target Organism 1
-  - Target Organism 2
-Publication Type: Peer reviewed, Preprint, Other
+  - Mycobacterium tuberculosis
+Publication Type: Preprint
 Publication Year: 2026
 Publication: https://doi.org/10.64898/2026.09.28.754881
 Source Code: https://github.com/jasdeep002/MtbAIM
