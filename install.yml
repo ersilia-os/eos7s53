@@ -1,5 +1,9 @@
 python: "3.11"
 commands:
+    # LightGBM needs the OpenMP runtime. The slim image only has it as a dependency of the
+    # build toolchain, which the pack step purges, so install it explicitly. Skipped when not
+    # root (conda test environments ship their own).
+    - '[ "$(id -u)" -ne 0 ] || apt-get install -y libgomp1'
     - ["pip", "numpy", "2.4.6"]
     - ["pip", "scikit-learn", "1.9.1"]
     - ["pip", "joblib", "1.6.0"]
