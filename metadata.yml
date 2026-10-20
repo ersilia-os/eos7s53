@@ -23,8 +23,9 @@ Output:
   - Value
 Output Dimension: 16
 Output Consistency: Fixed
-Interpretation: Probabilities of activity and pMIC (-log10 molar MIC) for susceptible
-  and resistant M. tuberculosis, each paired with training-set Tanimoto similarity.
+Interpretation: Probabilities of activity and pMIC (-log10 molar MIC) for 
+  susceptible and resistant M. tuberculosis, each paired with training-set 
+  Tanimoto similarity.
 Tag:
   - Antimicrobial activity
   - MIC90
@@ -40,3 +41,4 @@ Publication: https://doi.org/10.64898/2026.09.28.754881
 Source Code: https://github.com/jasdeep002/MtbAIM
 License: MIT
 Contributor: arnaucoma24
+Incorporation Date: '2026-10-20'
